@@ -147,6 +147,7 @@ button:disabled, textarea:disabled { cursor: not-allowed; opacity: .52; }
 .product-shell {
   display: grid;
   grid-template-rows: 64px minmax(0, 1fr);
+  height: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -251,7 +252,12 @@ button:disabled, textarea:disabled { cursor: not-allowed; opacity: .52; }
   overflow: hidden;
   background: rgba(6, 17, 26, .98);
 }
-.center-scroll { min-height: 0; overflow-y: auto; scrollbar-gutter: stable; }
+.center-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
 .page-intro { border-bottom: 1px solid var(--border); padding: 15px 24px; }
 .page-intro span { color: var(--primary); font-size: 9px; font-weight: 650; letter-spacing: .17em; text-transform: uppercase; }
 .page-intro h1 { margin: 4px 0 3px; font-size: 23px; line-height: 1.25; letter-spacing: -.01em; }
@@ -475,7 +481,7 @@ textarea::placeholder { color: var(--subtle); }
   body { overflow: auto; }
   .competition-shell { height: auto; min-height: 100vh; overflow: visible; }
   .app-sidebar { display: none; }
-  .product-shell { display: block; overflow: visible; }
+  .product-shell { display: block; height: auto; overflow: visible; }
   .stage-toolbar { min-height: 64px; }
   .workspace { grid-template-columns: 210px minmax(0, 1fr); overflow: visible; }
   .evidence-panel { grid-column: 1 / -1; border-top: 1px solid var(--border); border-left: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
