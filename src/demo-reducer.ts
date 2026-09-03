@@ -1,4 +1,4 @@
-import { directionCandidates, initialSystemMessage, stageDirector, stageSeed } from "./demo-data";
+import { directionCandidates, initialSystemMessage, stageDirector, stageSeed, wideQaReplies } from "./demo-data";
 import type { DemoAction, DemoState, Message, MessageAction, StageId } from "./types";
 
 let messageCounter = 0;
@@ -36,6 +36,8 @@ function seedMessages(stage: StageId): Message[] {
 export function createInitialState(): DemoState {
   messageCounter = 0;
   return {
+    entryView: "entry",
+    entryPath: null,
     stage: "b3",
     messages: {
       b3: seedMessages("b3"),
@@ -45,8 +47,10 @@ export function createInitialState(): DemoState {
     },
     completed: [],
     b3DirectionsReady: false,
+    wideQaStep: 0,
     selectedDirection: null,
     directionsRejected: false,
+    narrowDraft: null,
     b5Step: 0,
     b6Challenged: false,
     gapFrozen: false,
@@ -102,6 +106,37 @@ function answerFor(text: string, target: StageId, state: DemoState): { body: str
 
 export function reducer(state: DemoState, action: DemoAction): DemoState {
   if (action.type === "reset") return createInitialState();
+  if (action.type === "backToEntry") return createInitialState();
+
+  if (action.type === "chooseEntry") {
+    return {
+      ...state,
+      entryView: action.path === "wide" ? "workbench" : "narrow-form",
+      entryPath: action.path,
+      inputSeed: state.inputSeed + 1,
+    };
+  }
+
+  if (action.type === "submitNarrow") {
+    const summary = `${action.draft.researchQuestion}\n材料：${action.draft.materialSystem}\n目标：${action.draft.target}`;
+    return {
+      ...state,
+      entryView: "workbench",
+      entryPath: "narrow",
+      stage: "b3",
+      selectedDirection: "specific-question",
+      narrowDraft: action.draft,
+      messages: {
+        ...state.messages,
+        b3: [
+          message("system", "已从具体问题入口创建公开 Mock Run；主题候选探索被显式跳过。", undefined, "DIRECT ENTRY · Mock"),
+          message("user", summary, undefined, "具体研究问题表"),
+          agentMessage("b3", "具体问题已经整理成 ResearchBrief Draft。请检查下方结构化字段；冻结后，两条入口会汇合到同一套 B5 自动文献研究。", "freeze-brief", "B4 · 等待 G1"),
+        ],
+      },
+      inputSeed: state.inputSeed + 1,
+    };
+  }
 
   if (action.type === "jump") return { ...state, stage: action.stage, inputSeed: state.inputSeed + 1 };
 
@@ -148,6 +183,18 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
   if (action.type === "submit") {
     const text = action.text.trim();
     if (!text) return state;
+    if (state.entryPath === "wide" && state.stage === "b3" && !state.b3DirectionsReady && !state.selectedDirection && state.wideQaStep < wideQaReplies.length) {
+      const reply = wideQaReplies[state.wideQaStep];
+      return {
+        ...state,
+        wideQaStep: state.wideQaStep + 1,
+        messages: {
+          ...state.messages,
+          b3: [...state.messages.b3, message("user", text, undefined, `科学家回答 ${state.wideQaStep + 1}/3`), agentMessage("b3", reply.body, reply.action, reply.meta)],
+        },
+        inputSeed: state.inputSeed + 1,
+      };
+    }
     const target = detectStage(text, state.stage);
     const response = answerFor(text, target, state);
     return {
@@ -187,6 +234,7 @@ export function reducer(state: DemoState, action: DemoAction): DemoState {
   if (action.type !== "formal") return state;
 
   if (action.action === "confirm-theme") {
+    if (state.entryPath === "wide" && state.wideQaStep < wideQaReplies.length) return state;
     return {
       ...state,
       stage: "b3",

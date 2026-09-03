@@ -1,4 +1,17 @@
 export type StageId = "b3" | "b5" | "b6" | "b7";
+export type EntryView = "entry" | "narrow-form" | "workbench";
+export type EntryPath = "wide" | "narrow";
+
+export type NarrowDraft = {
+  researchQuestion: string;
+  materialSystem: string;
+  target: string;
+  applicationContext: string;
+  processBoundary: string;
+  evidenceScope: string;
+  successCriteria: string;
+  exclusions: string;
+};
 
 export type MessageRole = "user" | "agent" | "system";
 
@@ -57,12 +70,16 @@ export type DirectionCandidate = {
 };
 
 export type DemoState = {
+  entryView: EntryView;
+  entryPath: EntryPath | null;
   stage: StageId;
   messages: Record<StageId, Message[]>;
   completed: StageId[];
   b3DirectionsReady: boolean;
+  wideQaStep: number;
   selectedDirection: string | null;
   directionsRejected: boolean;
+  narrowDraft: NarrowDraft | null;
   b5Step: number;
   b6Challenged: boolean;
   gapFrozen: boolean;
@@ -71,6 +88,9 @@ export type DemoState = {
 };
 
 export type DemoAction =
+  | { type: "chooseEntry"; path: EntryPath }
+  | { type: "submitNarrow"; draft: NarrowDraft }
+  | { type: "backToEntry" }
   | { type: "submit"; text: string }
   | { type: "jump"; stage: StageId }
   | { type: "formal"; action: MessageAction }

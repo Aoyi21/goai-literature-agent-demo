@@ -90,6 +90,7 @@ export function ConversationPanel({
   const [rejectComment, setRejectComment] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
   const latestAgentIndex = messages.map((msg) => msg.role).lastIndexOf("agent");
+  const guidedQa = stage.id === "b3" && !directionsReady && !selectedDirection;
 
   useEffect(() => {
     setText("");
@@ -197,24 +198,24 @@ export function ConversationPanel({
 
       <form className="composer" onSubmit={handleSubmit}>
         <div className="composer-presets">
-          <span>评委复现话术</span>
+          <span>{guidedQa ? "可直接发送的科学家回答" : "评委复现话术"}</span>
           <button type="button" className="fill-example" onClick={() => setText(recommended[0] ?? "")} disabled={locked}>填入示例</button>
         </div>
-        <div className="question-row" aria-label="推荐问题（点击直接发送）">
+        <div className={`question-row ${guidedQa ? "guided-answers" : ""}`} aria-label={guidedQa ? "推荐回答（点击直接发送）" : "推荐问题（点击直接发送）"}>
           {recommended.map((question) => (
-            <button type="button" key={question} onClick={() => submit(question)} disabled={locked} title="点击直接发送这句话">
+            <button type="button" key={question} onClick={() => submit(question)} disabled={locked} title={guidedQa ? "点击作为科学家回答发送" : "点击直接发送这句话"}>
               {question}
             </button>
           ))}
         </div>
-        <label htmlFor="demo-question">当前讨论</label>
+        <label htmlFor="demo-question">{guidedQa ? "描述宽主题或回答当前问题" : "当前讨论"}</label>
         <div className="input-row">
           <textarea
             id="demo-question"
             value={text}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={locked ? "Demo 已完成。点击“重新演示”可从 B3 再跑一遍。" : "输入问题，或点击上方推荐问题"}
+            placeholder={locked ? "Demo 已完成。点击“重新演示”可从入口再跑一遍。" : guidedQa ? "可以自由输入，也可以直接点击上方回答" : "输入问题，或点击上方推荐问题"}
             disabled={locked}
             rows={3}
           />

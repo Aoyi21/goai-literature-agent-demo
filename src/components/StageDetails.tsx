@@ -9,12 +9,15 @@ import {
   SearchCheck,
   ShieldCheck,
 } from "lucide-react";
-import type { DirectionCandidate, StageId } from "../types";
+import type { DirectionCandidate, EntryPath, NarrowDraft, StageId } from "../types";
 
 type Props = {
   stage: StageId;
+  entryPath: EntryPath | null;
   directionsReady: boolean;
+  wideQaStep: number;
   selectedDirection: string | null;
+  narrowDraft: NarrowDraft | null;
   candidates: DirectionCandidate[];
   b5Step: number;
   b6Challenged: boolean;
@@ -23,16 +26,19 @@ type Props = {
   onSelectDirection: (candidateId: string) => void;
 };
 
-const themeRows = [
-  ["宽主题", "从废旧磷酸铁基正极中寻找可公开验证的高值化路径"],
-  ["材料体系", "废旧磷酸铁基正极；LFP 只作公开参照"],
-  ["应用语境", "抗生素废水处理相关的氧化功能材料"],
-  ["价值目标", "尽量直接利用原料中的铁，减少中间转化"],
-  ["公开检索范围", "公开论文摘要、元数据与可合法读取的公开全文"],
-  ["约束", "两到四周小试；常规电化学、UV–Vis 与 XRD"],
-  ["不做事项", "不写入内部样品经验、精确配方或未公开结论"],
-  ["待澄清", "产物评价口径与杂质影响仍需在后续阶段保留"],
-];
+function themeRows(step: number) {
+  const waiting = "等待本轮回答";
+  return [
+    ["宽主题", step >= 1 ? "废旧磷酸铁基正极的高值化利用" : waiting],
+    ["材料体系", step >= 1 ? "废旧磷酸铁基正极；相邻含铁固废只作公开参照" : waiting],
+    ["应用语境", step >= 2 ? "面向水处理的氧化功能材料" : waiting],
+    ["价值目标", step >= 2 ? "优先直接利用原料中的铁，并保留短周期可验证性" : waiting],
+    ["公开检索范围", step >= 3 ? "公开论文摘要、元数据与可合法读取的公开全文" : waiting],
+    ["约束", step >= 3 ? "两到四周小试；常规电化学、UV–Vis 与 XRD" : waiting],
+    ["不做事项", step >= 3 ? "排除含氯路线、内部样品经验、精确配方和未公开结论" : waiting],
+    ["待澄清", step >= 3 ? "产物评价口径与杂质影响保留给后续研究" : waiting],
+  ];
+}
 
 function SectionTitle({ icon, title, meta }: { icon: React.ReactNode; title: string; meta: string }) {
   return (
@@ -43,20 +49,63 @@ function SectionTitle({ icon, title, meta }: { icon: React.ReactNode; title: str
   );
 }
 
-function B3Details({ directionsReady, selectedDirection, candidates, onSelectDirection }: Pick<Props, "directionsReady" | "selectedDirection" | "candidates" | "onSelectDirection">) {
+function NarrowBriefDetails({ draft }: { draft: NarrowDraft }) {
+  const rows: Array<[string, string]> = [
+    ["研究问题", draft.researchQuestion], ["材料体系", draft.materialSystem], ["目标物种 / 功能", draft.target],
+    ["应用语境", draft.applicationContext], ["工艺边界", draft.processBoundary], ["公开证据范围", draft.evidenceScope],
+    ["成功判据", draft.successCriteria], ["排除项", draft.exclusions],
+  ];
   return (
     <>
       <section className="detail-card theme-draft">
-        <SectionTitle icon={<FileCheck2 size={16} />} title="主题边界草稿" meta={directionsReady ? "讨论草稿 v1 · 已补齐" : "讨论草稿 v1 · DRAFT"} />
-        <div className={`draft-readiness ${directionsReady ? "complete" : "warning"}`}>
-          {directionsReady ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-          <div><strong>{directionsReady ? "主题边界已可用于候选探索" : "还缺 1 个正式确认"}</strong><p>{directionsReady ? "字段保留为 Mock 草稿，不会自动推进真实研究状态。" : "请在上方连续对话中确认主题边界。"}</p></div>
+        <SectionTitle icon={<FileCheck2 size={16} />} title="ResearchBrief Draft" meta="具体问题入口 · 等待 G1" />
+        <div className="draft-readiness complete"><CheckCircle2 size={16} /><div><strong>已跳过主题候选探索</strong><p>入口选择被显式记录；冻结后与宽入口汇合到同一套 B5。</p></div></div>
+        <dl className="draft-grid">
+          {rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value || "未填写 · 可在讨论中补充"}</dd></div>)}
+        </dl>
+        <footer>表格只是浏览器 Draft。点击上方最新 AI 消息里的冻结动作后，才生成 G1 Mock 记录。</footer>
+      </section>
+      <section className="detail-card evidence-ledger">
+        <SectionTitle icon={<BookOpenCheck size={16} />} title="入口与正式记录" meta="DIRECT ENTRY · CONTROLLED_E2E" />
+        <div className="evidence-ledger-grid">
+          <article><span>入口来源</span><strong>具体研究问题</strong><p>没有静默跳过 B3；页面明确记录直接进入 B4 ResearchBrief。</p><em>HUMAN INPUT · Draft</em></article>
+          <article><span>公开检索</span><strong>尚未启动</strong><p>只有 G1 冻结后，B5 才会沿固定问题自动研究。</p><em>WAITING G1</em></article>
+          <article><span>正式记录</span><strong>ResearchBrief · Mock Draft v1</strong><p>当前可讨论、可修改，但尚未形成正式 Artifact。</p><em>DRAFT</em></article>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function B3Details({ entryPath, wideQaStep, narrowDraft, directionsReady, selectedDirection, candidates, onSelectDirection }: Pick<Props, "entryPath" | "wideQaStep" | "narrowDraft" | "directionsReady" | "selectedDirection" | "candidates" | "onSelectDirection">) {
+  if (entryPath === "narrow" && narrowDraft) return <NarrowBriefDetails draft={narrowDraft} />;
+  const draftReady = wideQaStep >= 3;
+  const missingCount = [5, 3, 1, 0][Math.min(wideQaStep, 3)];
+  return (
+    <>
+      <section className="detail-card theme-draft">
+        <SectionTitle icon={<FileCheck2 size={16} />} title="主题边界草稿" meta={directionsReady ? "ThemeBrief · Mock v1" : "讨论草稿 · 浏览器内存"} />
+        <div className={`draft-readiness ${draftReady ? "complete" : "warning"}`}>
+          {draftReady ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+          <div><strong>{draftReady ? "已满足主题确认条件" : `还缺 ${missingCount} 项主题边界`}</strong><p>{draftReady ? directionsReady ? "G0 Mock 记录已回读，候选方向可比较。" : "请检查字段和论文线索，再点击最新 AI 消息中的正式动作。" : "每发送一次回答，AI 只补最影响下一步的字段。"}</p></div>
         </div>
         <dl className="draft-grid">
-          {themeRows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+          {themeRows(wideQaStep).map(([label, value]) => <div className={value === "等待本轮回答" ? "missing" : ""} key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
         </dl>
         <footer>草稿需要继续讨论；正式确认动作只出现在最新 AI 阶段结消息中。</footer>
       </section>
+
+      {wideQaStep >= 1 ? (
+        <section className="detail-card literature-scan">
+          <SectionTitle icon={<SearchCheck size={16} />} title="本轮公开论文线索" meta={`快速扫描 ${Math.min(wideQaStep, 2)}/2 · MOCK`} />
+          <p className="detail-lead">这些是用于引导收窄的改写线索，不是实时检索结果，也不证明目标原料已经实现对应路线。</p>
+          <div className="scan-list">
+            <article><span>PAPER-01 · 相邻证据</span><strong>铁基废料资源化与含铁物种回收</strong><p>提示“直接利用铁源”可以成为候选比较轴；目标材料适用性仍未知。</p><em>PUBLIC ABSTRACT · Mock locator</em></article>
+            <article><span>PAPER-02 · 方法近邻</span><strong>碱性电化学体系中的高价铁生成</strong><p>提供电位、碱度和阳极状态等检索词；不能直接外推到复杂废旧正极。</p><em>PUBLIC METADATA · Mock locator</em></article>
+            <article><span>PAPER-03 · 应用近邻</span><strong>高铁酸盐在抗生素废水处理中的氧化应用</strong><p>帮助把“高值化”连接到可测功能；产物来源与性能仍需分开验证。</p><em>PUBLIC ABSTRACT · Mock locator</em></article>
+          </div>
+        </section>
+      ) : null}
 
       {directionsReady ? (
         <section className="detail-card candidate-comparison">
@@ -170,7 +219,7 @@ function B7Details({ handoffApproved }: Pick<Props, "handoffApproved">) {
 export function StageDetails(props: Props) {
   return (
     <div className="stage-details" aria-label="当前阶段的草稿、证据与正式产物">
-      {props.stage === "b3" ? <B3Details directionsReady={props.directionsReady} selectedDirection={props.selectedDirection} candidates={props.candidates} onSelectDirection={props.onSelectDirection} /> : null}
+      {props.stage === "b3" ? <B3Details entryPath={props.entryPath} wideQaStep={props.wideQaStep} narrowDraft={props.narrowDraft} directionsReady={props.directionsReady} selectedDirection={props.selectedDirection} candidates={props.candidates} onSelectDirection={props.onSelectDirection} /> : null}
       {props.stage === "b5" ? <B5Details b5Step={props.b5Step} /> : null}
       {props.stage === "b6" ? <B6Details b6Challenged={props.b6Challenged} gapFrozen={props.gapFrozen} /> : null}
       {props.stage === "b7" ? <B7Details handoffApproved={props.handoffApproved} /> : null}

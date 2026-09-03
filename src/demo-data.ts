@@ -1,4 +1,4 @@
-import type { DirectionCandidate, MessageAction, Stage, StageId, StageSnapshot } from "./types";
+import type { DirectionCandidate, EntryPath, MessageAction, NarrowDraft, Stage, StageId, StageSnapshot } from "./types";
 
 export const stages: Stage[] = [
   {
@@ -54,6 +54,51 @@ export const recommendedQuestions: Record<StageId, string[]> = {
   ],
 };
 
+export const wideQaOptions: string[][] = [
+  [
+    "我想研究废旧磷酸铁基正极的高值化，但还没有确定具体产品。",
+    "我关心废旧正极里的铁，想看看能不能转成水处理用的功能材料。",
+    "我只有一个大方向，请先结合公开论文帮我慢慢收窄。",
+  ],
+  [
+    "优先水处理功能，同时尽量直接利用废旧正极中的铁。",
+    "先比较几类高值化方向，不限定最终产品。",
+    "更看重短周期内可以公开复核和小规模验证。",
+  ],
+  [
+    "两到四周小试；可用常规电化学、UV–Vis 和 XRD；排除含氯路线。",
+    "只看公开可复核证据，不使用内部样品经验和未公开参数。",
+    "优先步骤少、变量清楚的路线；复杂分离和高温处理先排除。",
+  ],
+];
+
+export const wideQaReplies: Array<{ body: string; meta: string; action?: MessageAction }> = [
+  {
+    body: "我先按公开关键词做了一轮快速扫描。Mock 文献线索集中在三类：铁基废料资源化、碱性电化学高价铁生成、以及高铁酸盐水处理。它们目前只是相邻证据。下一步先确定价值目标：你更看重材料回收价值、目标功能，还是短周期可验证性？",
+    meta: "B3 · 公开论文快速扫描 1/2",
+  },
+  {
+    body: "目标已经更清楚：优先保留废旧正极中的铁，并面向可测的水处理功能。我又对照了公开摘要；直接利用、一步转化和性能基准是三种不同收窄方式。最后还需要你的现实边界：时间、设备、禁止路线和公开范围。",
+    meta: "B3 · 主题边界追问 2/3",
+  },
+  {
+    body: "已把你的回答整理成 ThemeBrief Draft：材料、应用、价值目标、验证资源、排除项和公开检索范围已经补齐。请先检查下方草稿和论文线索；确认后才会写入 G0 Mock 记录并探索候选方向。",
+    meta: "B3 · ThemeBrief 已可确认",
+    action: "confirm-theme",
+  },
+];
+
+export const narrowDemoDraft: NarrowDraft = {
+  researchQuestion: "废旧磷酸铁基正极能否在无氯边界下，通过电化学过程形成可确认的 Fe(VI) 高铁酸盐？",
+  materialSystem: "废旧磷酸铁基正极；LFP 作为公开对照",
+  target: "Fe(VI) 高铁酸盐及其可确认的氧化功能",
+  applicationContext: "抗生素废水处理相关的公开方法比较",
+  processBoundary: "优先水相电化学；不预设具体配方；允许强碱条件",
+  evidenceScope: "公开论文摘要、元数据和可合法读取的公开全文",
+  successCriteria: "能定位到完整方法块，并明确报告检测方式、条件和限制",
+  exclusions: "排除含氯氧化、内部样品经验、未公开参数和实验成功断言",
+};
+
 export const stageJourney: Record<StageId, Array<{ label: string; detail: string }>> = {
   b3: [
     { label: "说明主题边界", detail: "已完成" },
@@ -93,9 +138,8 @@ export const stageDirector: Record<StageId, string> = {
 
 export const stageSeed: Record<StageId, { body: string; action?: MessageAction; meta: string }> = {
   b3: {
-    body: "先说一个宽主题。我会把材料体系、应用语境、价值目标、限制和公开检索范围整理成主题边界草稿。确认主题边界后，才会探索可比较的候选方向。",
-    action: "confirm-theme",
-    meta: "B3 · 主题讨论",
+    body: "先用一句白话说说你大概想研究什么，不必把问题一次写完整。我会结合公开 Mock 论文线索，每轮只追问一个最影响检索方向的问题，并把答案逐步整理进 ThemeBrief Draft。",
+    meta: "B3 · 宽主题对话 1/3",
   },
   b5: {
     body: "系统会沿冻结的 ResearchBrief 自动推进检索规划、筛选、公开证据抽取和知识覆盖。这里展示的是受控 Mock 过程，暂时无需操作。",
@@ -166,16 +210,44 @@ export function snapshotFor(
   handoffApproved: boolean,
   b3DirectionsReady = false,
   selectedDirection: string | null = null,
+  wideQaStep = 0,
+  entryPath: EntryPath | null = null,
 ): StageSnapshot {
   if (stage === "b3") {
+    if (entryPath === "narrow") {
+      return {
+        headline: "当前问题版本",
+        status: "ResearchBrief Draft / 等待 G1",
+        statusTone: "decision",
+        evidenceTitle: "入口与来源",
+        evidence: [
+          { label: "入口", value: "具体研究问题 · 直接进入 B4", tone: "success" },
+          { label: "主题探索", value: "显式跳过 · 已记录" },
+          { label: "公开检索", value: "冻结后才启动", tone: "warning" },
+        ],
+        coverageTitle: "ResearchBrief 条件",
+        coverage: [
+          { label: "研究问题", value: "已填写", tone: "success" },
+          { label: "材料与目标", value: "已填写", tone: "success" },
+          { label: "边界", value: "可在讨论中继续补充" },
+        ],
+        formalTitle: "Formal 状态",
+        formal: [
+          { label: "ResearchBrief", value: "Mock Draft v1" },
+          { label: "G1", value: "等待科学家冻结", tone: "warning" },
+        ],
+        limits: ["具体问题入口不会自动代签 G1。", "冻结前不启动正式文献研究。"],
+      };
+    }
     return {
       headline: "当前主题版本",
-      status: selectedDirection ? "方向已选 / 等待冻结问题" : b3DirectionsReady ? "候选已返回 / 等待择优" : "讨论草稿 v1 / 等待确认主题",
+      status: selectedDirection ? "方向已选 / 等待冻结问题" : b3DirectionsReady ? "候选已返回 / 等待择优" : wideQaStep >= 3 ? "ThemeBrief 已可确认" : `宽主题对话 ${wideQaStep}/3`,
       statusTone: "decision",
       evidenceTitle: "公开依据摘要",
       evidence: [
         { label: "Mock 来源", value: "CONTROLLED_E2E · 公开样例剧本", tone: "success" },
-        { label: "候选方向", value: b3DirectionsReady ? "候选 4 / 可选 1 / 可全部拒绝" : "等待确认主题" },
+        { label: "候选方向", value: b3DirectionsReady ? "候选 4 / 可选 1 / 可全部拒绝" : wideQaStep >= 3 ? "等待 G0" : "尚未开始" },
+        { label: "论文线索", value: wideQaStep > 0 ? "3 条公开 Mock 相邻线索" : "等待第一轮回答" },
         { label: "证据粒度", value: "只保留改写摘要与公开 locator 类标签" },
       ],
       coverageTitle: "收敛条件",
@@ -186,7 +258,7 @@ export function snapshotFor(
       ],
       formalTitle: "Formal 状态",
       formal: [
-        { label: "ThemeBrief", value: "Mock Draft v1" },
+        { label: "ThemeBrief", value: b3DirectionsReady ? "Mock Accepted v1" : `Draft · ${wideQaStep}/3` },
         { label: "ResearchBrief", value: selectedDirection ? "Draft · 等待冻结" : "尚未形成", tone: "warning" },
       ],
       limits: [

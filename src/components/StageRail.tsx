@@ -1,19 +1,29 @@
 import { CheckCircle2, Circle, CircleDot } from "lucide-react";
 import { stageJourney } from "../demo-data";
-import type { Stage, StageId } from "../types";
+import type { EntryPath, Stage, StageId } from "../types";
 
 type Props = {
   stages: Stage[];
   activeStage: StageId;
   completed: StageId[];
+  entryPath: EntryPath | null;
   b3DirectionsReady: boolean;
   selectedDirection: string | null;
   onJump: (stage: StageId) => void;
 };
 
-export function StageRail({ stages, activeStage, completed, b3DirectionsReady, selectedDirection, onJump }: Props) {
+export function StageRail({ stages, activeStage, completed, entryPath, b3DirectionsReady, selectedDirection, onJump }: Props) {
   const activeIndex = stages.findIndex((stage) => stage.id === activeStage);
-  const journey = activeStage === "b3"
+  const journey = activeStage === "b3" && entryPath === "narrow"
+    ? [
+        { label: "输入具体问题", detail: "已完成" },
+        { label: "主题候选探索", detail: "直接入口 · 已跳过" },
+        { label: "确认研究问题", detail: "当前" },
+        { label: "自动文献研究", detail: "等待 B5" },
+        { label: "验收 Research Gap", detail: "等待 B6" },
+        { label: "检查路线 C 交接包", detail: "等待 B7" },
+      ]
+    : activeStage === "b3"
     ? [
         { label: "说明主题边界", detail: "已完成" },
         { label: "比较候选方向", detail: selectedDirection ? "已完成" : b3DirectionsReady ? "当前 · 4 个候选" : "当前 · 等待探索" },
@@ -64,7 +74,7 @@ export function StageRail({ stages, activeStage, completed, b3DirectionsReady, s
         })}
       </ol>
       <div className="rail-note">
-        <p>{activeStage === "b3" ? "B3 只整理主题和候选方向，冻结后由 B5 自动研究。" : activeStage === "b5" ? "系统自动推进研究；科学家只查看步骤、依据和失败边界。" : activeStage === "b6" ? "Proposer 与 Challenger 只返回公开摘要，正式决定由科学家写入。" : "系统编译预览、校验和限制；科学家只做 H1 决定。"}</p>
+        <p>{activeStage === "b3" ? entryPath === "narrow" ? "具体问题直接进入 ResearchBrief，但仍需科学家明确冻结 G1。" : "B3 只整理主题和候选方向，选择后进入同一 ResearchBrief。" : activeStage === "b5" ? "系统自动推进研究；科学家只查看步骤、依据和失败边界。" : activeStage === "b6" ? "Proposer 与 Challenger 只返回公开摘要，正式决定由科学家写入。" : "系统编译预览、校验和限制；科学家只做 H1 决定。"}</p>
       </div>
       <span className="journey-progress" aria-hidden="true">{activeIndex + 1} / {stages.length}</span>
     </aside>
