@@ -231,7 +231,7 @@ export function snapshotFor(
           { label: "材料与目标", value: "已填写", tone: "success" },
           { label: "边界", value: "可在讨论中继续补充" },
         ],
-        formalTitle: "Formal 状态",
+        formalTitle: "正式状态",
         formal: [
           { label: "ResearchBrief", value: "Mock Draft v1" },
           { label: "G1", value: "等待科学家冻结", tone: "warning" },
@@ -256,7 +256,7 @@ export function snapshotFor(
         { label: "目标边界", value: "Fe(VI) / 高铁酸盐方向", tone: "success" },
         { label: "排除项", value: "不展示受限材料、密钥、全文或内部路径", tone: "warning" },
       ],
-      formalTitle: "Formal 状态",
+      formalTitle: "正式状态",
       formal: [
         { label: "ThemeBrief", value: b3DirectionsReady ? "Mock Accepted v1" : `Draft · ${wideQaStep}/3` },
         { label: "ResearchBrief", value: selectedDirection ? "Draft · 等待冻结" : "尚未形成", tone: "warning" },
@@ -285,7 +285,7 @@ export function snapshotFor(
         { label: "问题覆盖", value: done ? "覆盖 2 / 部分覆盖 1" : "等待 synthesis" },
         { label: "冲突记录", value: done ? "保留 1 条边界冲突" : "尚未整理" },
       ],
-      formalTitle: "Formal 状态",
+      formalTitle: "正式状态",
       formal: [
         { label: "SearchPlan", value: b5Step >= 1 ? "Mock Accepted" : "未写入" },
         { label: "EvidenceBundle", value: done ? "Mock Accepted" : "等待" },
@@ -315,7 +315,7 @@ export function snapshotFor(
         { label: "可验证变量", value: "pH、碱度、电流密度" },
         { label: "反证", value: b6Challenged ? "有近邻，无直接闭合" : "等待查询" },
       ],
-      formalTitle: "Formal 状态",
+      formalTitle: "正式状态",
       formal: [
         { label: "GapCandidate", value: "Mock v1" },
         { label: "ChallengeReport", value: b6Challenged ? "Mock Accepted" : "等待挑战" },
@@ -344,7 +344,7 @@ export function snapshotFor(
       { label: "限制", value: "不越过公开边界", tone: "success" },
       { label: "未解问题", value: "保留给路线 C，不在此生成答案", tone: "warning" },
     ],
-    formalTitle: "Formal 状态",
+    formalTitle: "正式状态",
     formal: [
       { label: "HandoffPreview", value: "Mock Ready" },
       { label: "H1 Decision", value: handoffApproved ? "Approved" : "Waiting", tone: handoffApproved ? "success" : "warning" },

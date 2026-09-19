@@ -11,7 +11,7 @@ import type { MessageAction, StageId } from "./types";
 
 const pageCopy: Record<StageId, { stageLabel: string; title: string; subtitle: string; toolbar: string }> = {
   b3: {
-    stageLabel: "B3 · RESEARCH BRIEF",
+    stageLabel: "B3 / 研究问题",
     title: "确认研究问题",
     subtitle: "比较候选方向，选定后把问题写入 ResearchBrief。",
     toolbar: "ResearchBrief · G0 / G1 人工闸门",
@@ -23,13 +23,13 @@ const pageCopy: Record<StageId, { stageLabel: string; title: string; subtitle: s
     toolbar: "自动文献研究 · 只读正式过程",
   },
   b6: {
-    stageLabel: "B6 · RESEARCH GAP",
+    stageLabel: "B6 / 研究空白",
     title: "Gap 对抗与冻结",
     subtitle: "用三组公开查新挑战候选 Gap，再决定是否交给 B7。",
     toolbar: "Research Gap · G2 人工闸门",
   },
   b7: {
-    stageLabel: "B7 · ROUTE C HANDOFF",
+    stageLabel: "B7 / 路线交接",
     title: "路线 C 研究交接包",
     subtitle: "在交给阶段 C Agent 前，检查 FrozenGap、依据、限制和硬校验。",
     toolbar: "路线 C 研究交接 · H1 人工闸门",
@@ -100,9 +100,8 @@ export function App() {
             <div><strong>GOAI 文献 Agent</strong><small>{copy.toolbar}</small></div>
           </div>
           <div className="toolbar-actions">
-            <div className="mock-banner" role="note" aria-label="公开 Mock Demo 边界"><ShieldCheck size={14} aria-hidden="true" />公开 Mock / 不调用模型 / 不代表科研结果</div>
+            <div className="mock-banner" role="note" aria-label="公开 Mock Demo 边界"><ShieldCheck size={14} aria-hidden="true" />公开演示 · 本地模拟 · 不调用模型</div>
             <span className="status-badge">{snapshot.status}</span>
-            <span className="run-id">RUN-CONTROLLED-DEMO</span>
             <button type="button" className="toolbar-reset" onClick={() => dispatch({ type: "reset" })}>
               <RotateCcw size={14} aria-hidden="true" />重新演示
             </button>

@@ -223,7 +223,7 @@ export function StageDetails(props: Props) {
       {props.stage === "b5" ? <B5Details b5Step={props.b5Step} /> : null}
       {props.stage === "b6" ? <B6Details b6Challenged={props.b6Challenged} gapFrozen={props.gapFrozen} /> : null}
       {props.stage === "b7" ? <B7Details handoffApproved={props.handoffApproved} /> : null}
-      <p className="mock-footnote"><ShieldCheck size={14} />公开 Mock Demo：这些卡片只复现产品结构和状态变化，不代表新增科研结果。</p>
+      <p className="mock-footnote"><ShieldCheck size={14} />公开演示只复现产品结构和状态变化，不代表新增科研结果。</p>
     </div>
   );
 }
