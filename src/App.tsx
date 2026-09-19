@@ -119,8 +119,8 @@ export function App() {
             selectedDirection={state.selectedDirection}
             onJump={handleJump}
           />
-          <section className="center-column" aria-labelledby="page-title">
-            <div className="center-scroll">
+          <section className="center-column interaction-column" aria-labelledby="page-title">
+            <div className="center-scroll interaction-scroll">
               <header className="page-intro">
                 <span>{copy.kicker}</span>
                 <h1 id="page-title">{copy.title}</h1>
@@ -142,6 +142,23 @@ export function App() {
                 inputSeed={state.inputSeed}
                 locked={state.handoffApproved && state.stage === "b7"}
               />
+            </div>
+            <footer className="workbench-footer">
+              <span>当前：{copy.title}</span>
+              <span>对话、选择与正式动作</span>
+              <span><ShieldCheck size={13} aria-hidden="true" />普通讨论不会改变真实研究流程</span>
+            </footer>
+          </section>
+
+          <section className="research-product-column" aria-labelledby="research-product-title">
+            <header className="product-column-header">
+              <div>
+                <span>{copy.kicker}</span>
+                <h2 id="research-product-title">研究产物</h2>
+              </div>
+              <p>草稿、候选、证据包与交接结果随当前阶段同步更新。</p>
+            </header>
+            <div className="research-product-scroll">
               <StageDetails
                 stage={state.stage}
                 entryPath={state.entryPath}
@@ -157,11 +174,6 @@ export function App() {
                 onSelectDirection={(candidateId) => dispatch({ type: "selectDirection", candidateId })}
               />
             </div>
-            <footer className="workbench-footer">
-              <span>当前：{copy.title}</span>
-              <span>点击左侧 B3 / B5 / B6 / B7 可直接查看对应 Mock 对话</span>
-              <span><ShieldCheck size={13} aria-hidden="true" />普通讨论不会改变真实研究流程</span>
-            </footer>
           </section>
           <EvidencePanel snapshot={snapshot} />
         </section>
