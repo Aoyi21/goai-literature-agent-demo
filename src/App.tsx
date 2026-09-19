@@ -9,27 +9,27 @@ import { directionCandidates, recommendedQuestions, snapshotFor, stages, wideQaO
 import { createInitialState, reducer } from "./demo-reducer";
 import type { MessageAction, StageId } from "./types";
 
-const pageCopy: Record<StageId, { kicker: string; title: string; subtitle: string; toolbar: string }> = {
+const pageCopy: Record<StageId, { stageLabel: string; title: string; subtitle: string; toolbar: string }> = {
   b3: {
-    kicker: "B3 · RESEARCH BRIEF",
+    stageLabel: "B3 · RESEARCH BRIEF",
     title: "确认研究问题",
-    subtitle: "把候选方向收敛成可公开复核、可冻结的 ResearchBrief。",
+    subtitle: "比较候选方向，选定后把问题写入 ResearchBrief。",
     toolbar: "ResearchBrief · G0 / G1 人工闸门",
   },
   b5: {
-    kicker: "B5 · 自动研究",
+    stageLabel: "B5 · 自动研究",
     title: "自动文献研究",
-    subtitle: "系统沿冻结的 ResearchBrief 自动推进；只需查看步骤、依据和失败边界。",
+    subtitle: "按已冻结的 ResearchBrief 依次完成检索规划、筛选和证据整理。",
     toolbar: "自动文献研究 · 只读正式过程",
   },
   b6: {
-    kicker: "B6 · RESEARCH GAP",
+    stageLabel: "B6 · RESEARCH GAP",
     title: "Gap 对抗与冻结",
-    subtitle: "先看候选与三组公开查新，再决定是否把一个 SURVIVED Gap 交给 B7。",
+    subtitle: "用三组公开查新挑战候选 Gap，再决定是否交给 B7。",
     toolbar: "Research Gap · G2 人工闸门",
   },
   b7: {
-    kicker: "B7 · ROUTE C HANDOFF",
+    stageLabel: "B7 · ROUTE C HANDOFF",
     title: "路线 C 研究交接包",
     subtitle: "在交给阶段 C Agent 前，检查 FrozenGap、依据、限制和硬校验。",
     toolbar: "路线 C 研究交接 · H1 人工闸门",
@@ -122,7 +122,7 @@ export function App() {
           <section className="center-column interaction-column" aria-labelledby="page-title">
             <div className="center-scroll interaction-scroll">
               <header className="page-intro">
-                <span>{copy.kicker}</span>
+                <span>{copy.stageLabel}</span>
                 <h1 id="page-title">{copy.title}</h1>
                 <p>{copy.subtitle}</p>
               </header>
@@ -152,11 +152,8 @@ export function App() {
 
           <section className="research-product-column" aria-labelledby="research-product-title">
             <header className="product-column-header">
-              <div>
-                <span>{copy.kicker}</span>
-                <h2 id="research-product-title">研究产物</h2>
-              </div>
-              <p>草稿、候选、证据包与交接结果随当前阶段同步更新。</p>
+              <h2 id="research-product-title">研究产物</h2>
+              <p>这里显示当前阶段已经形成的草稿、证据和记录。</p>
             </header>
             <div className="research-product-scroll">
               <StageDetails

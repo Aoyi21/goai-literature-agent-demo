@@ -116,7 +116,7 @@ function B3Details({ entryPath, wideQaStep, narrowDraft, directionsReady, select
               const selected = selectedDirection === candidate.id;
               return (
                 <article className={`direction-card ${selected ? "selected" : ""}`} key={candidate.id}>
-                  <header><span>{String(index + 1).padStart(2, "0")}</span><strong>{candidate.title}</strong>{selected ? <em>已选择</em> : null}</header>
+                  <header><span>候选 {index + 1}</span><strong>{candidate.title}</strong>{selected ? <em>已选择</em> : null}</header>
                   <p>{candidate.summary}</p>
                   <dl>
                     <div><dt>区别</dt><dd>{candidate.difference}</dd></div>

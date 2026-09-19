@@ -169,7 +169,7 @@ export function ConversationPanel({
                       key={candidate.id}
                       onClick={() => onSelectDirection(candidate.id)}
                     >
-                      <span>{String(candidateIndex + 1).padStart(2, "0")}</span>
+                      <span>候选 {candidateIndex + 1}</span>
                       <strong>选择这个方向，开始讨论研究问题：{candidate.title}</strong>
                     </button>
                   ))}
